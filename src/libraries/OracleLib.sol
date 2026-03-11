@@ -16,7 +16,7 @@ library OracleLib {
     error OracleLib__StalePrice();
 
     // @audit we know that this timeout is not acceptable for most chains
-    uint256 private constant TIMEOUT = 3 hours;
+    uint256 private constant TIMEOUT = 48 hours;
 
     // @audit we are not checking any sequencers here
     // @audit we are also not checking for a min or max price

@@ -12,10 +12,12 @@ contract DeployDTsla is Script {
 
     function run() external {
         // Get params
+
         IGetTslaReturnTypes.GetTslaReturnType memory tslaReturnType = getdTslaRequirements();
+        
+        vm.startBroadcast();
 
         // Actually deploy
-        vm.startBroadcast();
         deployDTSLA(
             tslaReturnType.subId,
             tslaReturnType.mintSource,

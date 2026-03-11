@@ -8,7 +8,7 @@
 const ASSET_TICKER = "TSLA"
 const CRYPTO_TICKER = "USDCUSD"
 // TODO
-const RWA_CONTRACT = "0x7358D4CDF1c468aA018ec41ddD98b44879a10962"
+const RWA_CONTRACT = "0x26e81a5c1E36bBDf5A0416120362Ee8D4864F6ff"
 const SLEEP_TIME = 5000 // 5 seconds
 
 
@@ -21,6 +21,7 @@ async function main() {
                            SELL TSLA FOR USD
     //////////////////////////////////////////////////////////////*/
     let side = "sell"
+    console.log("selling stock")
     let [client_order_id, orderStatus, responseStatus] = await placeOrder(ASSET_TICKER, amountTsla, side)
     if (responseStatus !== 200) {
         return Functions.encodeUint256(0)
@@ -40,6 +41,7 @@ async function main() {
                            BUY USDC WITH USD
     //////////////////////////////////////////////////////////////*/
     side = "buy"
+    console.log("buying USDC")
     [client_order_id, orderStatus, responseStatus] = await placeOrder(CRYPTO_TICKER, amountTsla, side)
     if (responseStatus !== 200) {
         return Functions.encodeUint256(0)
@@ -57,6 +59,9 @@ async function main() {
     /*//////////////////////////////////////////////////////////////
                          SEND USDC TO CONTRACT
     //////////////////////////////////////////////////////////////*/
+
+    console.log("sending USDC to contract")
+
     const transferId = await sendUsdcToContract(amountUsdc)
     if (transferId === null) {
         return Functions.encodeUint256(0)
@@ -100,7 +105,7 @@ async function placeOrder(symbol, qty, side) {
     console.log(`\n`)
 
     const { client_order_id, status: orderStatus } = response.data
-    return client_order_id, orderStatus, responseStatus
+    return [client_order_id, orderStatus, responseStatus]
 }
 
 // returns int: responseStatus

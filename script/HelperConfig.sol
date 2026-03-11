@@ -45,9 +45,10 @@ contract HelperConfig {
     int256 public constant INITIAL_ANSWER_USD = 1e8;
 
     constructor() {
-        chainIdToNetworkConfig[137] = getPolygonConfig();
-        chainIdToNetworkConfig[80_001] = getMumbaiConfig();
-        chainIdToNetworkConfig[31_337] = _setupAnvilConfig();
+        // chainIdToNetworkConfig[137] = getPolygonConfig();
+        // chainIdToNetworkConfig[80_001] = getMumbaiConfig();
+        // chainIdToNetworkConfig[31_337] = _setupAnvilConfig();
+        chainIdToNetworkConfig[11155111] = getSepoliaConfig();
         activeNetworkConfig = chainIdToNetworkConfig[block.chainid];
     }
 
@@ -98,13 +99,13 @@ contract HelperConfig {
             ethUsdPriceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306,
             functionsRouter: 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0,
             donId: 0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000,
-            subId: 2274,
+            subId: 6371,
             // USDC on Mumbai
             redemptionCoin: 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238,
             linkToken: 0x779877A7B0D9E8603169DdbD7836e478b4624789,
             ccipRouter: 0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59,
             ccipChainSelector: 16_015_286_601_757_825_753,
-            secretVersion: 0, // fill in!
+            secretVersion: 1773338028, // fill in!
             secretSlot: 0 // fill in!
          });
         // minimumRedemptionAmount: 30e6 // Please see your brokerage for min redemption amounts
@@ -118,7 +119,7 @@ contract HelperConfig {
             ethUsdPriceFeed: address(ethUsdFeedMock),
             functionsRouter: address(functionsRouterMock),
             donId: 0x66756e2d706f6c79676f6e2d6d756d6261692d31000000000000000000000000, // Dummy
-            subId: 1, // Dummy non-zero
+            subId: 6371, // Dummy non-zero
             redemptionCoin: address(usdcMock),
             linkToken: address(linkTokenMock),
             ccipRouter: address(ccipRouterMock),
