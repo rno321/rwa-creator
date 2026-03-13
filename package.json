@@ -8,7 +8,8 @@
   "scripts": {
     "simulate": "source .env && node ./functions/simulators/alpacaMintSimulator.js",
     "mint": "source .env && node ./functions/simulators/alpacaMintSimulator.js",
-    "redeem": "source .env && node ./functions/simulators/alpacaRedeemSimulator.js",
-    "uploadSecrets": "source .env && node ./functions/uploadSecrets.js"
+    "redeem": "set -a;. ./.env;set +a; NODE_BACKEND=js node ./functions/simulators/alpacaRedeemSimulator.js",
+    "uploadSecrets": "set -a;. ./.env;set +a; NODE_BACKEND=js node ./functions/uploadSecrets.js",
+    "set-env":"set -a;. ./.env;set +a"
   }
 }
