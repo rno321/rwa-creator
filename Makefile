@@ -1,47 +1,57 @@
 -include .env
 
-.PHONY: all test clean deploy fund help install snapshot format anvil scopefile deploy-bridges
+.PHONY: deploy
 
-DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+deploy :; @forge script script/DeployDTsla.s.sol:DeployDTsla --via-ir --private-key ${PRIVATE_KEY} \
+--rpc-url ${SEPOLIA_RPC_URL} --priority-gas-price 1 --etherscan-api-key ${ETHERSCAN_API_KEY} --verify --broadcast
 
-all: remove install build
+deploy-anvil :; forge script --via-ir script/DeployDTsla.s.sol:DeployDTsla \
+  --rpc-url http://127.0.0.1:8545 \
+  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+  --broadcast
+  
+# .PHONY: all test clean deploy fund help install snapshot format anvil scopefile deploy-bridges
 
-# Clean the repo
-clean  :; forge clean
+# DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
-# Remove modules
-remove :; rm -rf .gitmodules && rm -rf .git/modules/* && rm -rf lib && touch .gitmodules && git add . && git commit -m "modules"
+# all: remove install build
 
-install :; forge install cyfrin/foundry-devops --no-commit && forge install smartcontractkit/chainlink-brownie-contracts@0.8.0 --no-commit && forge install foundry-rs/forge-std --no-commit && forge install openzeppelin/openzeppelin-contracts --no-commit && forge install cyfrin/ccip-contracts@1.4.0 --no-commit
+# # Clean the repo
+# clean  :; forge clean
 
-# Update Dependencies
-update:; forge update
+# # Remove modules
+# remove :; rm -rf .gitmodules && rm -rf .git/modules/* && rm -rf lib && touch .gitmodules && git add . && git commit -m "modules"
 
-build:; forge build
+# install :; forge install cyfrin/foundry-devops --no-commit && forge install smartcontractkit/chainlink-brownie-contracts@0.8.0 --no-commit && forge install foundry-rs/forge-std --no-commit && forge install openzeppelin/openzeppelin-contracts --no-commit && forge install cyfrin/ccip-contracts@1.4.0 --no-commit
 
-test :; forge test 
+# # Update Dependencies
+# update:; forge update
 
-snapshot :; forge snapshot
+# build:; forge build
 
-format :; forge fmt
+# test :; forge test 
 
-anvil :; anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
+# snapshot :; forge snapshot
 
-slither :; slither . --config-file slither.config.json --checklist 
+# format :; forge fmt
 
-scope :; tree ./src/ | sed 's/└/#/g; s/──/--/g; s/├/#/g; s/│ /|/g; s/│/|/g'
+# anvil :; anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
 
-scopefile :; @tree ./src/ | sed 's/└/#/g' | awk -F '── ' '!/\.sol$$/ { path[int((length($$0) - length($$2))/2)] = $$2; next } { p = "src"; for(i=2; i<=int((length($$0) - length($$2))/2); i++) if (path[i] != "") p = p "/" path[i]; print p "/" $$2; }' > scope.txt
+# slither :; slither . --config-file slither.config.json --checklist 
 
-aderyn :; aderyn . 
+# scope :; tree ./src/ | sed 's/└/#/g; s/──/--/g; s/├/#/g; s/│ /|/g; s/│/|/g'
 
-simulate :; npm run simulate 
+# scopefile :; @tree ./src/ | sed 's/└/#/g' | awk -F '── ' '!/\.sol$$/ { path[int((length($$0) - length($$2))/2)] = $$2; next } { p = "src"; for(i=2; i<=int((length($$0) - length($$2))/2); i++) if (path[i] != "") p = p "/" path[i]; print p "/" $$2; }' > scope.txt
 
-getweth :; cast call TOKEN_BRIDGE_ADDRESS "getWeth()" --rpc-url ${SEPOLIA_RPC_URL} | cut -c 27- | xargs printf "0x%s\n" | cast --to-checksum-address 
+# aderyn :; aderyn . 
 
-# As of April 2024 , Mumbaiis deprecated and new testnet AMOY is available
-setSupportedChain-amoy :; cast send TOKEN_BRIDGE_ADDRESS "setSupportedChain(uint64,bool)" 16015286601757825753 true  --rpc-url ${AMOY_RPC_URL} --account XXX --sender YYY
-setSupportedChain-sepolia :; cast send TOKEN_BRIDGE_ADDRESS "setSupportedChain(uint64,bool)" 16281711391670634445 true --rpc-url ${SEPOLIA_RPC_URL} --account XXX --sender YYY
+# simulate :; npm run simulate 
 
-# Multi-chain deployment doesn't work with account/sender yet :/ 
-deploy-bridges :; forge script script/DeployTokenBridges.s.sol --private-key ${PRIVATE_KEY} --verify --broadcast
+# getweth :; cast call TOKEN_BRIDGE_ADDRESS "getWeth()" --rpc-url ${SEPOLIA_RPC_URL} | cut -c 27- | xargs printf "0x%s\n" | cast --to-checksum-address 
+
+# # As of April 2024 , Mumbaiis deprecated and new testnet AMOY is available
+# setSupportedChain-amoy :; cast send TOKEN_BRIDGE_ADDRESS "setSupportedChain(uint64,bool)" 16015286601757825753 true  --rpc-url ${AMOY_RPC_URL} --account XXX --sender YYY
+# setSupportedChain-sepolia :; cast send TOKEN_BRIDGE_ADDRESS "setSupportedChain(uint64,bool)" 16281711391670634445 true --rpc-url ${SEPOLIA_RPC_URL} --account XXX --sender YYY
+
+# # Multi-chain deployment doesn't work with account/sender yet :/ 
+# deploy-bridges :; forge script script/DeployTokenBridges.s.sol --private-key ${PRIVATE_KEY} --verify --broadcast
