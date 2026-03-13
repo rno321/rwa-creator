@@ -6,7 +6,7 @@
 // // Return 0 on unsuccessful sell
 
 const ASSET_TICKER = "TSLA"
-const CRYPTO_TICKER = "USDCUSD"
+const CRYPTO_TICKER = "USDC/USD"
 // TODO
 const RWA_CONTRACT = "0x26e81a5c1E36bBDf5A0416120362Ee8D4864F6ff"
 const SLEEP_TIME = 5000 // 5 seconds
@@ -34,7 +34,6 @@ async function main() {
     }
 
     return Functions.encodeUint256(amountUsdc)
-
 }
 
 async function sellTslaForUsd(amountTsla) {
@@ -43,6 +42,10 @@ async function sellTslaForUsd(amountTsla) {
         ASSET_TICKER,
         amountTsla,
         "sell",
+        "limit",
+        "day",
+        true,
+        "300",
     )
     // console.log(client_order_id, orderStatus, responseStatus)
     console.log(id)
@@ -57,8 +60,8 @@ async function sellTslaForUsd(amountTsla) {
     }
 
     const filled = await waitForOrderToFill(id)
-    console.log(filled);
-    
+    console.log(filled)
+
     if (!filled) {
         // @audit, if this fails... That's probably an issue
         console.log("cancelling")
@@ -75,6 +78,9 @@ async function buyUsdcWithUsd(amountTsla) {
         CRYPTO_TICKER,
         amountTsla,
         "buy",
+        "market",
+        "gtc",
+        false,
     )
 
     if (responseStatus !== 200) {
@@ -110,7 +116,7 @@ async function sendUsdcToContractFlow(amountUsdc) {
 }
 
 // returns string: client_order_id, string: orderStatus, int: responseStatus
-async function placeOrder(symbol, qty, side) {
+async function placeOrder(symbol, qty, side, type, time_in_force, extended_hours, limit_price) {
     // TODO, something is wrong with this request, need to fix
     const alpacaSellRequest = Functions.makeHttpRequest({
         method: "POST",
@@ -122,11 +128,13 @@ async function placeOrder(symbol, qty, side) {
             "APCA-API-SECRET-KEY": secrets.alpacaSecret,
         },
         data: {
-            side: side,
-            type: "market",
-            time_in_force: "gtc",
-            symbol: symbol,
-            qty: qty,
+            type,
+            time_in_force,
+            symbol,
+            qty,
+            side,
+            extended_hours,
+            limit_price,
         },
     })
 
@@ -134,15 +142,11 @@ async function placeOrder(symbol, qty, side) {
     const responseStatus = response.status
     console.log(`\nResponse status: ${responseStatus}\n`)
     // console.log(response)
-    console.log(`\n`)
     console.log(response.data.status)
     console.log("destructuring for place order")
 
-   if (!response || response.error || !response.data) {
-       return [null, null, response?.status ?? 0]
-   }
-   const { id, status:orderStatus } = response.data
-   return [id, orderStatus, response.status]
+    const { id, status: orderStatus } = response.data
+    return [id, orderStatus, response.status]
 }
 
 // returns int: responseStatus
@@ -169,9 +173,9 @@ async function waitForOrderToFill(client_order_id) {
     console.log("waiting for order to fill")
 
     let numberOfSleeps = 0
-    const capNumberOfSleeps = 10
+    const capNumberOfSleeps = 12
     let filled = false
-console.log(client_order_id)
+    console.log(client_order_id)
 
     while (numberOfSleeps < capNumberOfSleeps) {
         const alpacaOrderStatusRequest = Functions.makeHttpRequest({
@@ -185,12 +189,15 @@ console.log(client_order_id)
         })
 
         const [response] = await Promise.all([alpacaOrderStatusRequest])
-console.log(response.data)
-console.log(response.status)
+        // console.log(response.data)
+        // console.log(response.status)
 
         const responseStatus = response.status
         const { status: orderStatus } = response.data
         if (responseStatus !== 200) {
+            return false
+        }
+        if (isFailedOrderStatus(orderStatus)) {
             return false
         }
         if (orderStatus === "filled") {

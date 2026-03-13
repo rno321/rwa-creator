@@ -13,7 +13,7 @@ const requestConfig = {
   // Optional if secrets are expected in the sourceLocation of secrets (only Remote or DONHosted is supported)
   secretsLocation: Location.DONHosted,
   // TSLA amount, USDC amount
-  args: ["1", "1"],
+  args: ["10", "10"],
   // Code language (only JavaScript is currently supported)
   codeLanguage: CodeLanguage.JavaScript,
   // Expected type of the returned value
